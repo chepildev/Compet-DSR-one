@@ -11,6 +11,7 @@ import numpy as np
 import statsmodels.formula.api as smf
 from sklearn.linear_model import LinearRegression
 
+
 class Model:
     def __init__(self, Xtrain, Ytrain, Xtest, Ytest):
         self.X_train = Xtrain 
@@ -43,7 +44,8 @@ class Model:
 
         return fitted_model, predictions, score
     
- if __name__ == "__main__":
+if __name__ == "__main__":
+     pass
      # Example implementation
      model_formula = "total_cases ~ 1 + " \
                         "reanalysis_specific_humidity_g_per_kg + " \
