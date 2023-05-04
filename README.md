@@ -2,6 +2,14 @@
 04-06 May 2023
 Team Name: Compet-DSR-one
 
+### Collaborators
+| Name | Github Page |
+| Adam | https://github.com/tautme |
+| Eugene | https://github.com/chepildev |
+| Paul | https://github.com/pdjewell |
+| Justin | https://github.com/JustinZarb |
+
+
 ## Public Information
 
 [Challenge Summary](https://www.drivendata.org/competitions/44/dengai-predicting-disease-spread/)
