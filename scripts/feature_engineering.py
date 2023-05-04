@@ -1,9 +1,5 @@
 # Functions for adding different features
 
-import pandas as pd
-import numpy as np
-
-
 def feature_eng(df):
     # drop week start date column
     df.drop('week_start_date', axis=1, inplace=True)
