@@ -26,16 +26,7 @@ def final_predict(X_test, X_train, y_train :pd.DataFrame,
     m.fit(X_train, y_train)
     final_preds = m.predict(X_test)
 
-    X_test = X_test.reset_index()
-    X_test['weekofyear'] = X_test['week_start_date'].dt.strftime('%W') 
-    X_test['year'] = X_test['week_start_date'].dt.strftime('%Y') 
-    X_test['weekofyear'] = X_test['weekofyear'].astype(int) + 1
-    X_test = X_test.drop(['week_start_date'], axis=1)
-    X_test['city'] = city
-    X_test['total_cases'] = final_preds.tolist()
-    X_test = X_test.loc[:, ['city','year','weekofyear','total_cases']]
-    
-    return X_test
+    return final_preds
 
 
 def write_submission(final_iq: pd.DataFrame, final_sj: pd.DataFrame) -> pd.DataFrame:
