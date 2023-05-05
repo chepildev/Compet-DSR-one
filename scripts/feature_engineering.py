@@ -88,6 +88,20 @@ def rolling_avg(data, column, window_size):
 
     return data
 
+
+def exp_weight_moving(data, column, span):
+    """Convert column total_cases to rolling average
+
+    Args: Dataframe, column name, window size
+
+    Returns: Dataframe with rolling average overwritting column
+
+    """
+    data[column] = data[column].ewm(span=span).mean()
+
+    return data
+
+
 if __name__ == "__main__":
     train_features = pd.read_csv("./data/dengue_features_train.csv")
     train = cyclical_encode_date(train_features)
