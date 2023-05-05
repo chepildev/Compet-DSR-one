@@ -6,14 +6,22 @@ import datetime as dt
 
 def drop_date(data):
     # Currently just removing the date column so models can run
-    try: data = data.drop(["week_start_date"], axis=1)
-    except: pass
-    try: data = data.drop(["date"], axis=1)
-    except: pass
-    try: data = data.drop(["year"], axis=1)
-    except: pass
-    try: data = data.drop(["weekofyear"], axis=1)
-    except: pass
+    try:
+        data = data.drop(columns=["week_start_date"], axis=1)
+    except:
+        pass
+    try:
+        data = data.drop(columns=["date"], axis=1)
+    except:
+        pass
+    try:
+        data = data.drop(columns=["year"], axis=1)
+    except:
+        pass
+    try:
+        data = data.drop(columns=["weekofyear"], axis=1)
+    except:
+        pass
 
     return data
 
@@ -33,7 +41,7 @@ def cyclical_encode_date(df: pd.DataFrame) -> pd.DataFrame:
     Returns:
         pd.DataFrame: the inputted dataframe with cyclically encoded date columns
     """
-    #df["date"] = pd.to_datetime(df.loc[:, "week_start_date"], format="%Y-%m-%d")
+    # df["date"] = pd.to_datetime(df.loc[:, "week_start_date"], format="%Y-%m-%d")
     month = df.loc[:, "week_start_date"].dt.month
     week_of_year = df.loc[:, "week_start_date"].dt.isocalendar().week
 
@@ -45,7 +53,7 @@ def cyclical_encode_date(df: pd.DataFrame) -> pd.DataFrame:
 
     # Set index to date
     df.set_index("week_start_date", inplace=True, drop=True)
-    
+
     return df
 
 
@@ -67,6 +75,7 @@ def shift_features(df: pd.DataFrame, periods: int, merge: bool = True) -> pd.Dat
 
     df_shifted = df.shift(periods=periods, axis=0)
     df_shifted.rename(columns=lambda name: rename_col(name, periods), inplace=True)
+    df_shifted.drop(f"total_cases_{periods}up", axis=1, inplace=True)
 
     if merge:
         combined = df.join(df_shifted, how="left")
@@ -87,6 +96,7 @@ def rolling_avg(data, column, window_size):
     data[column] = data[column].rolling(window_size).mean()
 
     return data
+
 
 if __name__ == "__main__":
     train_features = pd.read_csv("./data/dengue_features_train.csv")
