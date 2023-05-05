@@ -80,18 +80,19 @@ def train_cv_split(data: pd.DataFrame, city: str) -> Tuple:
     Not performed for iq due to insufficient data 
 
     """
-
+    x = data.loc[:, data.columns!=['total_cases']]
+    y = data.loc[:, 'total_cases']
     if city == 'sj':
-        X_train = data.loc[:650, data.columns != 'total_cases']
-        X_test = data.loc[650:, data.columns != 'total_cases']
-        y_train = data.loc[:650,'total_cases']
-        y_test = data.loc[650:,'total_cases']
+        X_train = x.iloc[:650, :]
+        X_test = x.iloc[650:, :]
+        y_train = y.iloc[:650, :]
+        y_test = y.iloc[650:, :]
     
     elif city == 'iq':
-        X_train = data.loc[:, data.columns != 'total_cases']
-        X_test = data.loc[:, data.columns != 'total_cases']
-        y_train = data.loc[:,'total_cases']
-        y_test = data.loc[:,'total_cases']
+        X_train = x
+        X_test = x
+        y_train = y
+        y_test = y
 
     return X_train, y_train, X_test, y_test 
     
