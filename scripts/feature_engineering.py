@@ -75,6 +75,17 @@ def shift_features(df:pd.DataFrame, periods:int, merge:bool=True) -> pd.DataFram
     
     return combined
 
+def rolling_avg(data, column, window_size):
+    """Convert column total_cases to rolling average
+
+    Args: Dataframe, column name, window size
+
+    Returns: Dataframe with rolling average overwritting column
+
+    """
+    data[column] = data[column].rolling(window_size).mean()
+
+    return data
 
 if __name__ == "__main__":
     train_features = pd.read_csv('./data/dengue_features_train.csv')
