@@ -27,7 +27,7 @@ def merge_data(train_features: pd.DataFrame, train_target: pd.DataFrame, test_fe
     return merged_data
 
 
-def pre_process(data: pd.DataFrame, city: str) -> pd.DataFrame:
+def pre_process(data: pd.DataFrame, city: str, remove_anomalies=False) -> pd.DataFrame:
     """_summary_
 
     Args:
@@ -50,6 +50,11 @@ def pre_process(data: pd.DataFrame, city: str) -> pd.DataFrame:
     data = data.fillna(method='ffill')
 
     # Remove anomalies 
+    if remove_anomalies:
+        if city == 'sj':
+            data = data.loc[data['total_cases'] < 350, :] 
+        elif city == 'iq':
+            data = data.loc[data['total_cases'] < 80, :] 
     
     return data
 
