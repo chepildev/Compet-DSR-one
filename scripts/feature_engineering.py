@@ -6,14 +6,14 @@ import datetime as dt
 
 def drop_date(data):
     # Currently just removing the date column so models can run
-    try:
-        data = data.drop(["week_start_date"], axis=1)
-    except:
-        pass
-    try:
-        data = data.drop(["date"], axis=1)
-    except:
-        pass
+    try: data = data.drop(["week_start_date"], axis=1)
+    except: pass
+    try: data = data.drop(["date"], axis=1)
+    except: pass
+    try: data = data.drop(["year"], axis=1)
+    except: pass
+    try: data = data.drop(["weekofyear"], axis=1)
+    except: pass
 
     return data
 
@@ -33,9 +33,9 @@ def cyclical_encode_date(df: pd.DataFrame) -> pd.DataFrame:
     Returns:
         pd.DataFrame: the inputted dataframe with cyclically encoded date columns
     """
-    df["date"] = pd.to_datetime(df.loc[:, "week_start_date"], format="%Y-%m-%d")
-    month = df.loc[:, "date"].dt.month
-    week_of_year = df.loc[:, "date"].dt.isocalendar().week
+    #df["date"] = pd.to_datetime(df.loc[:, "week_start_date"], format="%Y-%m-%d")
+    month = df.loc[:, "week_start_date"].dt.month
+    week_of_year = df.loc[:, "week_start_date"].dt.isocalendar().week
 
     # Encode both sin and cosine
     df["sin_month"] = np.sin(2 * np.pi * month / max(month))
@@ -44,7 +44,8 @@ def cyclical_encode_date(df: pd.DataFrame) -> pd.DataFrame:
     df["cos_week"] = np.cos(2 * np.pi * week_of_year / max(week_of_year))
 
     # Set index to date
-    df.set_index("date", inplace=True, drop=True)
+    df.set_index("week_start_date", inplace=True, drop=True)
+    
     return df
 
 
@@ -59,6 +60,7 @@ def shift_features(df: pd.DataFrame, periods: int, merge: bool = True) -> pd.Dat
     Returns:
         pd.DataFrame: either the shifted dataframe or the joined and shifted dataframe together
     """
+    df = drop_date(df)
 
     def rename_col(name, periods):
         return f"{name}_{periods}up"
@@ -72,6 +74,7 @@ def shift_features(df: pd.DataFrame, periods: int, merge: bool = True) -> pd.Dat
         combined = combined.iloc[periods:, :]
 
     return combined
+
 
 def rolling_avg(data, column, window_size):
     """Convert column total_cases to rolling average
