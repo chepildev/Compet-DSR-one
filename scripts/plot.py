@@ -1,9 +1,6 @@
-import os
 import pandas as pd
-import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-from plotly.colors import n_colors, hex_to_rgb
 import plotly.io as pio
 pio.renderers.default = "browser"
 
