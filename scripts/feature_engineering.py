@@ -14,7 +14,8 @@ def feature_engineer_1(data):
 
 def cyclical_encode_date(df:pd.DataFrame) -> pd.DataFrame:
     """Add cyclical encoding to date column
-    month and week of year are encoded into two variables each.
+    Encode the month and week of year are encoded into sin and cos variables. 
+    Set index to date
     new columns:
     - sin_month
     - cos_month
@@ -35,9 +36,39 @@ def cyclical_encode_date(df:pd.DataFrame) -> pd.DataFrame:
     df['cos_month'] = np.cos(2 * np.pi * month / max(month))
     df['sin_week'] = np.sin(2 * np.pi * week_of_year / max(week_of_year))
     df['cos_week'] = np.cos(2 * np.pi * week_of_year / max(week_of_year))
+    
+    # Set index to date
+    df.set_index("date", inplace=True)
+    df.drop("week_start_date", inplace=True)
 
-    return df
+    return df.columns
+
+def shift_features(df:pd.DataFrame, periods:int, merge:bool=True) -> pd.DataFrame:
+    """Create a new set of features by shifting the data by a specified amount
+
+    Args:
+        df (pd.DataFrame): input dataframe
+        shift (int): number of periods (weeks) to shift
+        drop_original (bool, default=True): if True, the columns are appended to the original dataframe
+
+    Returns:
+        pd.DataFrame: either the shifted dataframe or the joined and shifted dataframe together
+    """
+    def rename_col(name, periods):
+        return f"{name}_{periods}up"
+    
+    df_shifted = df.shift(periods=periods, axis=0)
+    df_shifted.rename(columns=lambda name:rename_col(name, periods), inplace=True)
+
+    if merge:
+        combined = df.join(df_shifted, how="left")
+        # drop first n rows
+        combined = combined.iloc[periods:,:]
+    
+    return combined
+
 
 if __name__ == "__main__":
     train_features = pd.read_csv('./data/dengue_features_train.csv')
-    cyclical_encode_data(train_features)
+    train = cyclical_encode_date(train_features)
+    print(train)
