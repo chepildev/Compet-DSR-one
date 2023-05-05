@@ -61,6 +61,7 @@ def pre_process(data: pd.DataFrame, city: str, remove_anomalies=False, inc_test=
             data = data.loc[data['total_cases'] < 350, :] 
         elif city == 'iq':
             data = data.loc[data['total_cases'] < 80, :] 
+            data = data.iloc[50:, :]
     
     return data
 

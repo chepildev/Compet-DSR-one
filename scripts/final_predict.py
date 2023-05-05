@@ -1,6 +1,7 @@
 
 import pandas as pd
 import numpy as np
+from sklearn.preprocessing import MinMaxScaler
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.tree import DecisionTreeRegressor
 from xgboost import XGBRegressor 
@@ -22,9 +23,15 @@ def final_predict(X_test, X_train, y_train :pd.DataFrame,
     Returns:
         pd.DataFrame: _description_
     """    
+
+    scaler = MinMaxScaler()
+    scaler.fit(X_train)
+    X_train_scaled = scaler.transform(X_train)
+    X_test_scaled = scaler.transform(X_test)
+
     m = eval(model + "(**params)")
-    m.fit(X_train, y_train)
-    final_preds = m.predict(X_test)
+    m.fit(X_train_scaled, y_train)
+    final_preds = m.predict(X_test_scaled)
 
     return final_preds
 
