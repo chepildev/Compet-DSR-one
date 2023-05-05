@@ -54,13 +54,6 @@ def pre_process(data: pd.DataFrame, city: str) -> pd.DataFrame:
     return data
 
 
-def feature_engineer(data):
-
-    # Currently just removing the date column so models can run
-    data = data.drop(['week_start_date'], axis=1)
-
-    return data
-
 
 def train_cv_split(data: pd.DataFrame, city: str) -> Tuple:
     """_summary_
