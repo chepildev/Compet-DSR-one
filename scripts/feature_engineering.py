@@ -5,12 +5,20 @@ import datetime as dt
 
 
 
-def feature_engineer_1(data):
+def drop_date(data):
 
     # Currently just removing the date column so models can run
-    data = data.drop(['week_start_date'], axis=1)
+    try:
+        data = data.drop(['week_start_date'], axis=1)
+    except:
+        pass
+    try:
+        data = data.drop(['date'], axis=1)
+    except:
+        pass
 
     return data
+
 
 def cyclical_encode_date(df:pd.DataFrame) -> pd.DataFrame:
     """Add cyclical encoding to date column

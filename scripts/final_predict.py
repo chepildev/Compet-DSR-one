@@ -44,6 +44,7 @@ def write_submission(final_iq: pd.DataFrame, final_sj: pd.DataFrame) -> pd.DataF
     """    
     
     final = pd.concat([final_sj, final_iq], axis=0)
+    final['total_cases'] = final['total_cases'].astype(int)
     final.to_csv('for_submission.csv', index=False)
     print('Writing submission file to folder: ')
     

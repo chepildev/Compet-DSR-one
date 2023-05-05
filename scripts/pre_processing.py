@@ -2,6 +2,8 @@
 import pandas as pd
 import numpy as np
 import datetime as dt 
+from sklearn.model_selection import TimeSeriesSplit
+
 from typing import List, Tuple, Dict
 
 
@@ -27,7 +29,7 @@ def merge_data(train_features: pd.DataFrame, train_target: pd.DataFrame, test_fe
     return merged_data
 
 
-def pre_process(data: pd.DataFrame, city: str, remove_anomalies=False) -> pd.DataFrame:
+def pre_process(data: pd.DataFrame, city: str, remove_anomalies=False, inc_test=False) -> pd.DataFrame:
     """_summary_
 
     Args:
@@ -47,7 +49,11 @@ def pre_process(data: pd.DataFrame, city: str, remove_anomalies=False) -> pd.Dat
     data['week_start_date'] = pd.to_datetime(data['week_start_date'])
 
     # Removing missing values
-    data = data.fillna(method='ffill')
+    if inc_test == True:
+        data['total_cases'] = data['total_cases'].fillna(-1)
+        data = data.fillna(method='ffill')
+    else:
+        data = data.fillna(method='ffill')
 
     # Remove anomalies 
     if remove_anomalies:
