@@ -46,9 +46,7 @@ def cyclical_encode_date(df:pd.DataFrame) -> pd.DataFrame:
     df['cos_week'] = np.cos(2 * np.pi * week_of_year / max(week_of_year))
     
     # Set index to date
-    df.set_index("date", inplace=True)
-    df.drop("week_start_date", inplace=True)
-
+    df.set_index("date", inplace=True, drop=True)
     return df.columns
 
 def shift_features(df:pd.DataFrame, periods:int, merge:bool=True) -> pd.DataFrame:
