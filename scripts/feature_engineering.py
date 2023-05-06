@@ -212,7 +212,9 @@ def add_rolling(data: pd.DataFrame, city: str, fillna: bool = True) -> pd.DataFr
     return data
 
 
-def add_rolling2(data: pd.DataFrame, city: str, fillna: bool = True) -> pd.DataFrame:
+def add_rolling2(
+    data: pd.DataFrame, city: str = None, recipe: dict = None, fillna: bool = True
+) -> pd.DataFrame:
     """_summary_
     Args:
         data (pd.DataFrame): data to add new features to
@@ -222,24 +224,27 @@ def add_rolling2(data: pd.DataFrame, city: str, fillna: bool = True) -> pd.DataF
     Returns:
         pd.DataFrame: with new rolling average features
     """
-    recipe_all = {
-        "ndvi_ne": 20,
-        "ndvi_nw": 20,
-        "precipitation_amt_mm": 12,
-        "reanalysis_air_temp_k": 12,
-        "reanalysis_avg_temp_k": 16,
-        "reanalysis_dew_point_temp_k": 8,
-        "reanalysis_max_air_temp_k": 18,
-        "reanalysis_precip_amt_kg_per_m2": 10,
-        "reanalysis_relative_humidity_percent": 20,
-        "reanalysis_sat_precip_amt_mm": 30,
-        "reanalysis_specific_humidity_g_per_kg": 8,
-        "reanalysis_tdtr_k": 24,
-        "station_avg_temp_c": 12,
-        "station_diur_temp_rng_c": 16,
-        "station_max_temp_c": 12,
-        "station_precip_mm": 16,
-    }
+    if recipe is None:
+        recipe_all = {
+            "ndvi_ne": 20,
+            "ndvi_nw": 20,
+            "precipitation_amt_mm": 12,
+            "reanalysis_air_temp_k": 12,
+            "reanalysis_avg_temp_k": 16,
+            "reanalysis_dew_point_temp_k": 8,
+            "reanalysis_max_air_temp_k": 18,
+            "reanalysis_precip_amt_kg_per_m2": 10,
+            "reanalysis_relative_humidity_percent": 20,
+            "reanalysis_sat_precip_amt_mm": 30,
+            "reanalysis_specific_humidity_g_per_kg": 8,
+            "reanalysis_tdtr_k": 24,
+            "station_avg_temp_c": 12,
+            "station_diur_temp_rng_c": 16,
+            "station_max_temp_c": 12,
+            "station_precip_mm": 16,
+        }
+    else:
+        recipe_all = recipe
 
     recipe_iq = {
         "ndvi_se": 18,
@@ -329,8 +334,11 @@ def create_binary_station_min_temp_c(data: pd.DataFrame, temp: float) -> pd.Data
     Returns:
         pd.DataFrame: column output with binary output
     """
-    data[f'station_min_temp_c_binary_{temp}_c'] = data['station_min_temp_c'].apply(lambda x: 1 if x < temp else 0)
+    data[f"station_min_temp_c_binary_{temp}_c"] = data["station_min_temp_c"].apply(
+        lambda x: 1 if x < temp else 0
+    )
     return data
+
 
 if __name__ == "__main__":
     train_features = pd.read_csv("./data/dengue_features_train.csv")
