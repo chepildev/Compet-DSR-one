@@ -8,7 +8,7 @@ def rolling_chart(data: pd.DataFrame, y: pd.DataFrame, feature: str, rolling=8, 
     data1 = y
     data2 = data.loc[:, feature].rolling(rolling, center=set_center).mean()
 
-    fig, ax1 = plt.subplots(figsize=(20,4))
+    fig, ax1 = plt.subplots(figsize=(20,5))
 
     t = np.arange(data.shape[0])
 
@@ -33,7 +33,7 @@ def feature_output_chart(data: pd.DataFrame, y: pd.DataFrame, feature: str, city
     data1 = y
     data2 = data.loc[:, feature]
 
-    fig, ax1 = plt.subplots(figsize=(20,4))
+    fig, ax1 = plt.subplots(figsize=(20,5))
 
     t = np.arange(data.shape[0])
 
@@ -61,7 +61,7 @@ def plot_train_test(y_pred, y, test_or_train='undefined'):
 
     data1 = y_pred
     data2 = y
-    fig, ax1 = plt.subplots(figsize=(16,4))
+    fig, ax1 = plt.subplots(figsize=(18,4))
     t = np.arange(y_pred.shape[0])
 
     color = 'tab:red'
