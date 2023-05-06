@@ -5,15 +5,13 @@ from sklearn.model_selection import TimeSeriesSplit
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.metrics import mean_absolute_error, mean_squared_error
-#from scripts.model_evaluation import regression_evaluation
 from xgboost import XGBRegressor 
-
 
 
 
 def xg_model(X: pd.DataFrame, y:pd.DataFrame, tss_splits=2, params={}) -> pd.DataFrame:
     """_summary_
-
+    XGBoostRegressor model function 
     Args:
         X (pd.DataFrame): 
         y (pd.DataFrame): 
@@ -71,9 +69,7 @@ def xg_model(X: pd.DataFrame, y:pd.DataFrame, tss_splits=2, params={}) -> pd.Dat
                             'max_depth':md, 'subsample':subsample,
                             'colsample_bytree':colsample_bytree,
                             'reg_lambda':reg_lambda,
-                            'gamma':gamma,
-                            })
-
+                            'gamma':gamma,})
         i += 1
 
     return pd.DataFrame(score)
@@ -81,7 +77,7 @@ def xg_model(X: pd.DataFrame, y:pd.DataFrame, tss_splits=2, params={}) -> pd.Dat
 
 def rforest_model(X: pd.DataFrame, y:pd.DataFrame, tss_splits=2, params={}) -> pd.DataFrame:
     """_summary_
-
+    Random Forest (sklearn) model function 
     Args:
         X (pd.DataFrame): 
         y (pd.DataFrame): 
@@ -136,12 +132,36 @@ def rforest_model(X: pd.DataFrame, y:pd.DataFrame, tss_splits=2, params={}) -> p
                                     'rmse_test':rmse_test, 'rmse_train':rmse_train, 
                                     'mae_test':mae_test, 'mae_train':mae_train,
                                     'n_estimators':n, 'max_depth':md,
-                                    'min_samples_split':mss, 'min_samples_leaf':msl,
-                                    })
-
+                                    'min_samples_split':mss, 'min_samples_leaf':msl})
         i += 1
 
     return pd.DataFrame(score)
+
+
+
+def rf_feature_importance(X: pd.DataFrame, y:pd.DataFrame, params={}) -> pd.DataFrame:
+    """_summary_
+    Function to computer the Random Forest feature importances for analysis.
+    Using the method: .feature_importances_
+    Args:
+        X (pd.DataFrame): Training features for model
+        y (pd.DataFrame): Training output for model
+        params (dict, optional): custom hyperparameters for model. Defaults to {}.
+
+    Returns:
+        pd.Series: RandomForest feature importances 
+    """
+    scaler = MinMaxScaler()
+    X_scaled = scaler.fit_transform(X)
+
+    rfm = RandomForestRegressor(n_estimators=100,
+                                max_depth=5)        
+    rfm.fit(X, y)
+                        
+    importances = rfm.feature_importances_
+    rf_feature_importances = pd.Series(importances, index=X.columns)
+
+    return rf_feature_importances 
 
 
 
