@@ -24,6 +24,7 @@ def xg_model(X: pd.DataFrame, y:pd.DataFrame, tss_splits=2, params={}) -> pd.Dat
     tss = TimeSeriesSplit(n_splits=2) 
     i=1
     score = []
+    plots = []
 
     scaler = MinMaxScaler()
     X_scaled = scaler.fit_transform(X)
@@ -71,9 +72,13 @@ def xg_model(X: pd.DataFrame, y:pd.DataFrame, tss_splits=2, params={}) -> pd.Dat
                                 'colsample_bytree':colsample_bytree,
                                 'reg_lambda':rl,
                                 'gamma':gamma,})
+                    
+                    plots.append({'i': i, 'pred_train':pred_train, 
+                                  'pred_test':pred_test,
+                                  'y_train':y_train, 'y_test':y_test})
         i += 1
 
-    return pd.DataFrame(score)
+    return pd.DataFrame(score), plots
 
 
 def rforest_model(X: pd.DataFrame, y:pd.DataFrame, tss_splits=2, params={}) -> pd.DataFrame:
@@ -194,5 +199,5 @@ def rf_model(X_train, y_train, X_test, y_test, params={}):
     return rmse_train, rmse_test, mae_train, mae_test
     
     
-    
+
 
