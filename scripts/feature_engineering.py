@@ -255,6 +255,19 @@ def remove_original_cols(data: pd.DataFrame) -> pd.DataFrame:
     return data
 
 
+def create_binary_station_min_temp_c(data: pd.DataFrame, temp: float) -> pd.DataFrame:
+    """create binary output column for min_temp_c less than temp: 19.5 (default)
+
+    Args:
+        data (pd.DataFrame): column to be transformed
+        temp (float): temperature threshold
+
+    Returns:
+        pd.DataFrame: column output with binary output
+    """
+    data[f'station_min_temp_c_binary_{temp}_c'] = data['station_min_temp_c'].apply(lambda x: 1 if x < temp else 0)
+    return data
+
 if __name__ == "__main__":
     train_features = pd.read_csv("./data/dengue_features_train.csv")
     train = cyclical_encode_date(train_features)
