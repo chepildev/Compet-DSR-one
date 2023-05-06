@@ -170,19 +170,17 @@ def remove_original_cols(data: pd.DataFrame) -> pd.DataFrame:
     Returns:
         pd.DataFrame: DataFrame with columns removed 
 
-    For now keeping the original cols that were most correlated in benchmark: 
-    - reanalysis_specific_humidity_g_per_kg
-    - reanalysis_dew_point_temp_k
     """    
-    cols_to_remove = ['ndvi_ne', 'ndvi_nw',
-       'ndvi_se', 'ndvi_sw', 'precipitation_amt_mm', 'reanalysis_air_temp_k',
-       'reanalysis_avg_temp_k',
-       'reanalysis_max_air_temp_k', 'reanalysis_min_air_temp_k',
-       'reanalysis_precip_amt_kg_per_m2',
-       'reanalysis_relative_humidity_percent', 'reanalysis_sat_precip_amt_mm',
-       'reanalysis_tdtr_k',
-       'station_avg_temp_c', 'station_diur_temp_rng_c', 'station_max_temp_c',
-       'station_min_temp_c', 'station_precip_mm']
+    cols_to_remove = ['reanalysis_specific_humidity_g_per_kg',
+                      'reanalysis_dew_point_temp_k','ndvi_ne', 'ndvi_nw',
+                        'ndvi_se', 'ndvi_sw', 'precipitation_amt_mm', 'reanalysis_air_temp_k',
+                        'reanalysis_avg_temp_k',
+                        'reanalysis_max_air_temp_k', 'reanalysis_min_air_temp_k',
+                        'reanalysis_precip_amt_kg_per_m2',
+                        'reanalysis_relative_humidity_percent', 'reanalysis_sat_precip_amt_mm',
+                        'reanalysis_tdtr_k',
+                        'station_avg_temp_c', 'station_diur_temp_rng_c', 'station_max_temp_c',
+                        'station_min_temp_c', 'station_precip_mm']
     
     data = data.drop(cols_to_remove, axis=1)
 
