@@ -128,8 +128,8 @@ def add_rolling(data: pd.DataFrame, city: str, fillna: bool = True) -> pd.DataFr
 
     data["ndvi_ne_rolling"] = data.loc[:, "ndvi_ne"].rolling(20, center=False).mean()
     data["ndvi_nw_rolling"] = data.loc[:, "ndvi_nw"].rolling(20, center=False).mean()
-    data["precipitation_amt_mm_rolling"] = (
-        data.loc[:, "precipitation_amt_mm"].rolling(12, center=True).mean()    )    data["reanalysis_air_temp_k_rolling"] = (
+    data["precipitation_amt_mm_rolling"] = (data.loc[:, "precipitation_amt_mm"].rolling(12, center=True).mean()    )    
+    data["reanalysis_air_temp_k_rolling"] = (
         data.loc[:, "reanalysis_air_temp_k"].rolling(12, center=False).mean()   )    data["reanalysis_avg_temp_k_rolling"] = (
         data.loc[:, "reanalysis_avg_temp_k"].rolling(16, center=False).mean()   )   data["reanalysis_dew_point_temp_k_rolling"] = (
         data.loc[:, "reanalysis_dew_point_temp_k"].rolling(8, center=True).mean()   )    data["reanalysis_max_air_temp_k_rolling"] = (
@@ -207,15 +207,16 @@ def add_rolling2(data: pd.DataFrame, city: str, fillna: bool = True) -> pd.DataF
             data.loc[:, feature_name].rolling(periods, center=False).mean()
         )
 
-    for feature_name, periods in recipe_iq.items:
-        data[f"{feature_name}_{periods}week"] = (
-            data.loc[:, feature_name].rolling(periods, center=False).mean()
-        )
-
-    for feature_name, periods in recipe_sj.items:
-        data[f"{feature_name}_{periods}week"] = (
-            data.loc[:, feature_name].rolling(periods, center=False).mean()
-        )
+    if city == "iq":
+        for feature_name, periods in recipe_iq.items:
+            data[f"{feature_name}_{periods}week"] = (
+                data.loc[:, feature_name].rolling(periods, center=False).mean()
+            )
+    if city == "sj":
+        for feature_name, periods in recipe_sj.items:
+            data[f"{feature_name}_{periods}week"] = (
+                data.loc[:, feature_name].rolling(periods, center=False).mean()
+            )
 
     if fillna:
         data = data.fillna(method="ffill")
@@ -237,25 +238,16 @@ def remove_original_cols(data: pd.DataFrame) -> pd.DataFrame:
     - reanalysis_specific_humidity_g_per_kg
     - reanalysis_dew_point_temp_k
     """
-    cols_to_remove = [
-        "ndvi_ne",
-        "ndvi_nw",
-        "ndvi_se",
-        "ndvi_sw",
-        "precipitation_amt_mm",
-        "reanalysis_air_temp_k",
-        "reanalysis_avg_temp_k",
-        "reanalysis_max_air_temp_k",
-        "reanalysis_min_air_temp_k",
-        "reanalysis_precip_amt_kg_per_m2",
-        "reanalysis_relative_humidity_percent",
-        "reanalysis_sat_precip_amt_mm",
-        "reanalysis_tdtr_k",
-        "station_avg_temp_c",
-        "station_diur_temp_rng_c",
-        "station_max_temp_c",
-        "station_min_temp_c",
-        "station_precip_mm",
+    cols_to_remove = ['reanalysis_specific_humidity_g_per_kg',
+                      'reanalysis_dew_point_temp_k','ndvi_ne', 'ndvi_nw',
+                        'ndvi_se', 'ndvi_sw', 'precipitation_amt_mm', 'reanalysis_air_temp_k',
+                        'reanalysis_avg_temp_k',
+                        'reanalysis_max_air_temp_k', 'reanalysis_min_air_temp_k',
+                        'reanalysis_precip_amt_kg_per_m2',
+                        'reanalysis_relative_humidity_percent', 'reanalysis_sat_precip_amt_mm',
+                        'reanalysis_tdtr_k',
+                        'station_avg_temp_c', 'station_diur_temp_rng_c', 'station_max_temp_c',
+                        'station_min_temp_c', 'station_precip_mm']
     ]
 
     data = data.drop(cols_to_remove, axis=1)

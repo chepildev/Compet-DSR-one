@@ -35,41 +35,42 @@ def xg_model(X: pd.DataFrame, y:pd.DataFrame, tss_splits=2, params={}) -> pd.Dat
         #params
         learning_rate=0.05
         n_estimators=[100]
-        max_depth=[5]
+        max_depth=[4,5,6]
         subsample=0.6
         colsample_bytree=0.8
-        reg_lambda=10
+        reg_lambda=[5,10,20]
         gamma=10
 
         for n in n_estimators:
             for md in max_depth:
+                for rl in reg_lambda:
 
-                xgm = XGBRegressor(
-                        learning_rate=learning_rate,
-                        n_estimators=n,
-                        max_depth=md,
-                        subsample=subsample,
-                        colsample_bytree=colsample_bytree,
-                        reg_lambda=reg_lambda,
-                        gamma=gamma)
-                
-                xgm.fit(X_train, y_train)
-                
-                pred_train = xgm.predict(X_train)
-                pred_test = xgm.predict(X_test)
-                rmse_train = mean_squared_error(y_train, pred_train)**0.5
-                rmse_test = mean_squared_error(y_test, pred_test)**0.5
-                mae_train = mean_absolute_error(y_train, pred_train)
-                mae_test = mean_absolute_error(y_test, pred_test)
+                    xgm = XGBRegressor(
+                            learning_rate=learning_rate,
+                            n_estimators=n,
+                            max_depth=md,
+                            subsample=subsample,
+                            colsample_bytree=colsample_bytree,
+                            reg_lambda=rl,
+                            gamma=gamma)
+                    
+                    xgm.fit(X_train, y_train)
+                    
+                    pred_train = xgm.predict(X_train)
+                    pred_test = xgm.predict(X_test)
+                    rmse_train = mean_squared_error(y_train, pred_train)**0.5
+                    rmse_test = mean_squared_error(y_test, pred_test)**0.5
+                    mae_train = mean_absolute_error(y_train, pred_train)
+                    mae_test = mean_absolute_error(y_test, pred_test)
 
-                score.append({'TSS iteration': i, 
-                            'rmse_test':rmse_test, 'rmse_train':rmse_train, 
-                            'mae_test':mae_test, 'mae_train':mae_train,
-                            'learning_rate':learning_rate, 'n_estimators':n,
-                            'max_depth':md, 'subsample':subsample,
-                            'colsample_bytree':colsample_bytree,
-                            'reg_lambda':reg_lambda,
-                            'gamma':gamma,})
+                    score.append({'TSS iteration': i, 
+                                'rmse_test':rmse_test, 'rmse_train':rmse_train, 
+                                'mae_test':mae_test, 'mae_train':mae_train,
+                                'learning_rate':learning_rate, 'n_estimators':n,
+                                'max_depth':md, 'subsample':subsample,
+                                'colsample_bytree':colsample_bytree,
+                                'reg_lambda':rl,
+                                'gamma':gamma,})
         i += 1
 
     return pd.DataFrame(score)

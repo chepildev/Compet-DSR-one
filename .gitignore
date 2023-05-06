@@ -131,3 +131,7 @@ dmypy.json
 
 # Custom
 ignore-file.txt
+
+# VS Code
+.vscode/settings.json
+.DS_Store
