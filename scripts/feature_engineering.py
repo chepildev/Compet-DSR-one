@@ -209,6 +209,9 @@ def add_rolling(data: pd.DataFrame, city: str, fillna: bool = True) -> pd.DataFr
     if fillna:
         data = data.fillna(method="ffill")
         data = data.fillna(method="bfill")
+    else:
+        data = data.fillna(method="ffill")
+        data = data.dropna()
 
     return data
 
@@ -345,3 +348,131 @@ if __name__ == "__main__":
     train_features = pd.read_csv("./data/dengue_features_train.csv")
     train = cyclical_encode_date(train_features)
     print(train)
+
+
+def add_seasonality_factors(data: pd.DataFrame, city: str) -> pd.DataFrame:
+    """_summary_
+    Adding 3 new features for seasonality 
+    Args:
+        data (pd.DataFrame)
+        city (str): 'sj' or 'iq'
+
+    Returns:
+        pd.DataFrame: with 3 new features 
+    """
+    week_of_year = data.loc[:, "week_start_date"].dt.isocalendar().week
+    data["cos_week"] = np.cos(2 * np.pi * week_of_year / max(week_of_year))
+
+    if city == 'iq':
+        data['part_of_year'] = data.apply(lambda row: 1 if row['weekofyear'] < 15 or row['weekofyear'] > 35 else 0, axis=1)
+        data['cos_week_shift'] = data['cos_week'].shift(-1)
+        data['cos_week_shift'] = data['cos_week_shift'].fillna(method='ffill')
+
+    elif city == 'sj':
+        data['part_of_year'] = data.apply(lambda row: 1 if row['weekofyear'] < 10 or row['weekofyear'] > 25 else 0, axis=1)
+        data['cos_week_shift'] = data['cos_week'].shift(-9)
+        data['cos_week_shift'] = data['cos_week_shift'].fillna(method='ffill')
+    
+    data['seasonality'] = (data['cos_week_shift'] + data['part_of_year'])
+
+    # Set index to date
+    data.set_index("week_start_date", inplace=True, drop=True)
+
+    return data
+
+
+def add_rolling_3(data:pd.DataFrame, city:str) -> pd.DataFrame:
+    """_summary_
+    Adding new average of multiple features and rolled averages.
+    Different approach taken to each city. 
+    Args:
+        data (pd.DataFrame)
+        city (str): 'iq' or 'sj'
+
+    Returns:
+        pd.DataFrame: returning dataframe with new features 
+    """
+    if city == 'iq':
+        # Vegetation
+        data['ndvi_avg'] = data.loc[:,['ndvi_ne','ndvi_nw','ndvi_se','ndvi_sw']].mean(axis=1)
+        data['ndvi_avg_rolling'] = data['ndvi_avg'].rolling(24, center=False).mean()
+        # Precipitation
+        data['precip_avg'] = data[['reanalysis_sat_precip_amt_mm','station_precip_mm','precipitation_amt_mm','reanalysis_precip_amt_kg_per_m2']].mean(axis=1)
+        data['precip_avg_rolling'] = data['precip_avg'].rolling(12, center=True).mean()
+        data['precip_avg_evm'] = data['precip_avg'].ewm(span=8).mean()
+        # Humidity 
+        data['humidity_relative_rolling'] = data['reanalysis_relative_humidity_percent'].rolling(20, center=True).mean().shift(-6)
+        data['humidity_specific_rolling'] = data['reanalysis_specific_humidity_g_per_kg'].rolling(18, center=True).mean().shift(-4)
+        data['humidity_relative_evm'] = data['reanalysis_relative_humidity_percent'].ewm(span=20).mean()
+        data['humidity_specific_evm'] = data['reanalysis_relative_humidity_percent'].ewm(span=40).mean()
+        # Temperature: avg
+        data['temp_avg_avg'] = data[['station_avg_temp_c','reanalysis_avg_temp_k']].mean(axis=1)
+        data['temp_avg_avg_rolling'] = data['temp_avg_avg'].rolling(20, center=True).mean() #.shift(4)
+        data['temp_avg_avg_evm'] = data['temp_avg_avg'].ewm(span=30).mean()
+        # Temp: max 
+        data['max_temp_max'] = data[['station_max_temp_c','reanalysis_max_air_temp_k']].max(axis=1)
+        data['max_temp_avg'] = data[['station_max_temp_c','reanalysis_max_air_temp_k']].mean(axis=1)
+        data['max_temp_max_rolling'] = data['max_temp_max'].rolling(20, center=False).mean() #.shift(4)
+        data['max_temp_max_ewm'] = data['max_temp_max'].ewm(span=40).mean()
+        data['max_temp_avg_rolling'] = data['max_temp_avg'].rolling(20, center=False).mean() #.shift(4)
+        data['max_temp_avg_ewm'] = data['max_temp_avg'].ewm(span=40).mean()
+        # Temp: min
+        data['min_temp_min'] = data[['station_min_temp_c','reanalysis_max_air_temp_k']].max(axis=1)
+        data['min_temp_avg'] = data[['station_min_temp_c','reanalysis_min_air_temp_k']].mean(axis=1)
+        data['min_temp_min_rolling'] = data['min_temp_min'].rolling(20, center=False).mean() #.shift(4)
+        data['min_temp_min_ewm'] = data['min_temp_min'].ewm(span=40).mean()
+        data['min_temp_avg_rolling'] = data['min_temp_avg'].rolling(20, center=False).mean() #.shift(4)
+        data['min_temp_avg_ewm'] = data['min_temp_avg'].ewm(span=40).mean()
+        # Dew temp
+        data['dew_point_temp_rolling'] = data['reanalysis_dew_point_temp_k'].rolling(12, center=True).mean().shift(-4)
+        data['dew_point_temp_rolling_ewm'] = data['reanalysis_dew_point_temp_k'].ewm(span=40).mean()
+        # Diurnal temp range
+        data['diurnal_temp_range_avg'] = data[['reanalysis_tdtr_k','station_diur_temp_rng_c']].mean(axis=1)
+        data['diurnal_temp_range_avg_rolling'] = data['diurnal_temp_range_avg'].rolling(24, center=False).mean() #.shift(4)
+        # Combining features
+        data['temp_precip_humid_combined'] = data['max_temp_avg_rolling'] * data['precip_avg_rolling'] * data['humidity_specific_rolling'] 
+        data['temp_precip_humid_combined_rolling'] = data['temp_precip_humid_combined'].rolling(4, center=True).mean().shift(-6)
+
+
+    elif city == 'sj':
+        # Vegetation 
+        data['ndvi_avg'] = data.loc[:,['ndvi_ne','ndvi_nw','ndvi_se','ndvi_sw']].mean(axis=1)
+        data['ndvi_avg_rolling'] = data['ndvi_avg'].rolling(32, center=False).mean().shift(2)
+        # Precipitation 
+        data['precip_avg'] = data[['reanalysis_sat_precip_amt_mm','station_precip_mm','precipitation_amt_mm','reanalysis_precip_amt_kg_per_m2']].mean(axis=1)
+        data['precip_avg_rolling'] = data['precip_avg'].rolling(12, center=True).mean()
+        data['precip_avg_evm'] = data['precip_avg'].ewm(span=8).mean()
+        # Humidity 
+        data['humidity_relative_rolling'] = data['reanalysis_relative_humidity_percent'].rolling(20, center=False).mean() #.shift(4)
+        data['humidity_specific_rolling'] = data['reanalysis_specific_humidity_g_per_kg'].rolling(18, center=False).mean()
+        data['humidity_relative_evm'] = data['reanalysis_relative_humidity_percent'].ewm(span=40).mean()
+        data['humidity_specific_evm'] = data['reanalysis_relative_humidity_percent'].ewm(span=40).mean()
+        # Temeperature: Avg
+        data['temp_avg_avg'] = data[['station_avg_temp_c','reanalysis_avg_temp_k']].mean(axis=1)
+        data['temp_avg_avg_rolling'] = data['temp_avg_avg'].rolling(12, center=False).mean() #.shift(4)
+        data['temp_avg_avg_evm'] = data['temp_avg_avg'].ewm(span=20).mean()
+        # Temp: max
+        data['max_temp_max'] = data[['station_max_temp_c','reanalysis_max_air_temp_k']].max(axis=1)
+        data['max_temp_avg'] = data[['station_max_temp_c','reanalysis_max_air_temp_k']].mean(axis=1)
+        data['max_temp_max_rolling'] = data['max_temp_max'].rolling(20, center=False).mean() #.shift(4)
+        data['max_temp_max_ewm'] = data['max_temp_max'].ewm(span=40).mean()
+        data['max_temp_avg_rolling'] = data['max_temp_avg'].rolling(20, center=False).mean() #.shift(4)
+        data['max_temp_avg_ewm'] = data['max_temp_avg'].ewm(span=40).mean()
+        # Temp: min
+        data['min_temp_min'] = data[['station_min_temp_c','reanalysis_max_air_temp_k']].max(axis=1)
+        data['min_temp_avg'] = data[['station_min_temp_c','reanalysis_min_air_temp_k']].mean(axis=1)
+        data['min_temp_min_rolling'] = data['min_temp_min'].rolling(20, center=False).mean() #.shift(4)
+        data['min_temp_min_ewm'] = data['min_temp_min'].ewm(span=40).mean()
+        data['min_temp_avg_rolling'] = data['min_temp_avg'].rolling(20, center=False).mean() #.shift(4)
+        data['min_temp_avg_ewm'] = data['min_temp_avg'].ewm(span=40).mean()
+        # Dew temp
+        data['dew_point_temp_rolling'] = data['reanalysis_dew_point_temp_k'].rolling(20, center=False).mean() #.shift(4)
+        data['dew_point_temp_rolling_ewm'] = data['reanalysis_dew_point_temp_k'].ewm(span=40).mean()
+        # Diural temp range
+        data['diurnal_temp_range_avg'] = data[['reanalysis_tdtr_k','station_diur_temp_rng_c']].mean(axis=1)
+        data['diurnal_temp_range_avg_rolling'] = data['diurnal_temp_range_avg'].rolling(22, center=False).mean() #.shift(4)
+        # Combining features
+        data['temp_precip_humid_combined'] = data['max_temp_avg_rolling'] * data['precip_avg_rolling'] * data['humidity_specific_rolling'] 
+        data['temp_precip_humid_combined_rolling'] = data['temp_precip_humid_combined'].rolling(6, center=True).mean()
+
+    return data

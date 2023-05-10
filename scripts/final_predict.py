@@ -4,12 +4,13 @@ import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.tree import DecisionTreeRegressor
+from sklearn.decomposition import PCA
 from xgboost import XGBRegressor 
 import datetime as dt
 
 
 def final_predict(X_test, X_train, y_train :pd.DataFrame,
-                  city: str, model:str, params={}) -> pd.DataFrame:
+                  city: str, model:str, include_PCA=False, params={}) -> pd.DataFrame:
     """_summary_
 
     Args:
@@ -28,6 +29,14 @@ def final_predict(X_test, X_train, y_train :pd.DataFrame,
     scaler.fit(X_train)
     X_train_scaled = scaler.transform(X_train)
     X_test_scaled = scaler.transform(X_test)
+
+    if include_PCA:
+        pca = PCA(n_components=3)
+        pca.fit(X_train_scaled)
+        X_train_pca = pca.transform(X_train_scaled)
+        X_test_pca = pca.transform(X_test_scaled)
+        X_train_scaled = np.concatenate((X_train_scaled, X_train_pca), axis=1)
+        X_test_scaled = np.concatenate((X_test_scaled, X_test_pca), axis=1)
 
     m = eval(model + "(**params)")
     m.fit(X_train_scaled, y_train)

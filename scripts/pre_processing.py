@@ -7,7 +7,7 @@ from sklearn.model_selection import TimeSeriesSplit
 from typing import List, Tuple, Dict
 
 
-def merge_data(train_features: pd.DataFrame, train_target: pd.DataFrame, test_features: pd.DataFrame, inc_test=False) -> pd.DataFrame:
+def merge_data(train_features: pd.DataFrame, train_target: pd.DataFrame, test_features: pd.DataFrame, inc_test=False, smooth_y=False) -> pd.DataFrame:
     """_summary_
 
     Args:
@@ -19,9 +19,14 @@ def merge_data(train_features: pd.DataFrame, train_target: pd.DataFrame, test_fe
     Returns:
         pd.DataFrame: _description_
     """    
+    if smooth_y:
+        train_target['total_cases'] = train_target['total_cases'].rolling(6, center=True).mean()
+        train_target = train_target.fillna(method='ffill')
+        train_target = train_target.fillna(method='bfill')
+    
     # Combine the train features with the target into one data frame 
     merged_data = pd.concat([train_features, train_target['total_cases']], axis=1)
-    
+
     # if setting met, then combine also the test for feature engineering etc
     if inc_test == True:
         merged_data = pd.concat([merged_data, test_features], axis=0) 
@@ -29,7 +34,7 @@ def merge_data(train_features: pd.DataFrame, train_target: pd.DataFrame, test_fe
     return merged_data
 
 
-def pre_process(data: pd.DataFrame, city: str, remove_anomalies=False, inc_test=False) -> pd.DataFrame:
+def pre_process(data: pd.DataFrame, city: str, remove_anomalies=False, inc_test=False, smooth_y=False) -> pd.DataFrame:
     """_summary_
 
     Args:
@@ -61,8 +66,15 @@ def pre_process(data: pd.DataFrame, city: str, remove_anomalies=False, inc_test=
             data = data.loc[data['total_cases'] < 350, :] 
         elif city == 'iq':
             data = data.loc[data['total_cases'] < 80, :] 
-            data = data.iloc[55:, :]
+            data = data.iloc[74:, :]
     
+    if smooth_y:
+        data['total_cases'] = data['total_cases'].rolling(6, center=True).mean()
+        data = data.fillna(method='ffill')
+        data = data.fillna(method='bfill')
+    data = data.fillna(method='ffill')
+    data = data.fillna(method='bfill')
+
     return data
 
 

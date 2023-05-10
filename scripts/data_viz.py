@@ -66,19 +66,12 @@ def plot_train_test(y_pred, y, test_or_train='undefined'):
 
     color = 'tab:red'
     ax1.set_xlabel('Weeks')
-    ax1.set_ylabel('Predictions', color=color)
-    ax1.plot(t, data1, color=color, label='Total cases predictions')
-    ax1.tick_params(axis='y', labelcolor=color)
-
-    ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
-    color = 'tab:blue'
-    ax2.set_ylabel(test_or_train, color=color)  # we already handled the x-label with ax1
-    ax2.plot(t, data2, color=color, label=test_or_train)
-    ax2.tick_params(axis='y', labelcolor=color)
-
+    ax1.set_ylabel('Number of cases') 
+    ax1.plot(t, data1, color='red', label='Total cases predictions')
+    ax1.plot(t, data2, color='blue', label=test_or_train)
+    ax1.tick_params(axis='y')
     fig.legend()
     ax1.set_title(f'Model predicts compared to {test_or_train} data against time')
-
     fig.tight_layout()  # otherwise the right y-label is slightly clipped
     
     return plt.show()
